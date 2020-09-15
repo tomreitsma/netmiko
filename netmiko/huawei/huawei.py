@@ -108,14 +108,18 @@ class HuaweiSSH(HuaweiBase):
     def special_login_handler(self):
         """Handle password change request by ignoring it"""
 
-        # Huawei can prompt for password change. Search for that or for normal prompt
-        password_change_prompt = r"((Change now|Please choose))|([\]>]\s*$)"
-        output = self.read_until_pattern(password_change_prompt)
+        password_change_prompt = r"(Change now|Please choose)"
+
+        # We want to read until we found either the password change prompt
+        # or the regular prompt
+        output = self.read_until_pattern(
+            fr"({password_change_prompt})|([\]>]\s*$)")
+        
+        # Only write no if the password change prompt has been found
         if re.search(password_change_prompt, output):
             self.write_channel("N\n")
             self.clear_buffer()
         return output
-
 
 class HuaweiTelnet(HuaweiBase):
     """Huawei Telnet driver."""
